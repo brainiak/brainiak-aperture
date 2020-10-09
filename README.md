@@ -7,12 +7,11 @@ We also plan to use this repo to provide an annotated bibliography for each meth
 
 The file structure we propose is as follows:
 
---root
-  --notebooks
-    --isc
-    --srm 
-    ...
-  --annotated_bibliography
-    --isc
-    --srm
++root \
+++ notebooks \
++++ isc \
+    ... 
+    
+++annotated_bibliography \
++++ isc \
     ....
