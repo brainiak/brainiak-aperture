@@ -28,6 +28,11 @@ RUN apt-get update --fix-missing \
         git+https://github.com/brainiak/brainiak.git@938151acff10cf49954f2c9933278de327b9da9d \
     && rm -rf ~/.cache/pip \
     && mkdir /data \
-    && wget -qO /data/pieman.zip https://drive.google.com/open?id=1IBA39ZZjeGS1u_DvZdiw1AZZQMS3K5q0 \
-    && unzip /data/pieman.zip \
+    && wget --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate -q \
+        "https://docs.google.com/uc?export=download&id=1IBA39ZZjeGS1u_DvZdiw1AZZQMS3K5q0" -O- \
+        | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p' > /tmp/confirm \
+    && wget --load-cookies /tmp/cookies.txt --no-check-certificate -q \
+        "https://docs.google.com/uc?export=download&confirm="$(cat /tmp/confirm)"&id=1IBA39ZZjeGS1u_DvZdiw1AZZQMS3K5q0" -O /data/pieman.zip \
+    && rm /tmp/cookies.txt /tmp/confirm \
+    && unzip /data/pieman.zip -d /data/ \
     && rm /data/pieman.zip
