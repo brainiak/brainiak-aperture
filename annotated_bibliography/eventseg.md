@@ -1,0 +1,7 @@
+1. Baldassano, C., Chen, J., Zadbood, A., Pillow, J. W., Hasson, U., & Norman, K. A. (2017). Discovering Event Structure in Continuous Narrative Perception and Memory. Neuron, 95(3), 709–721.e5. *Describes and validates the event segmentation method, and applies it to perception and recall data from multiple experiments.*
+
+2. Baldassano, C., Hasson, U., & Norman, K. A. (2018). Representation of Real-World Event Schemas during Narrative Perception. The Journal of Neuroscience: The Official Journal of the Society for Neuroscience, 38(45), 9689–9699. *Uses the event segmentation model to find common event structure among narratives with a shared schematic script.*
+
+3. Silva, M., Baldassano, C., & Fuentemilla, L. (2019). Rapid memory reactivation at movie event boundaries promotes episodic encoding. In bioRxiv (p. 511782). https://doi.org/10.1101/511782 *Applies the event segmentation model to EEG movie-watching data.*
+
+4. Ben-Yakov, A., & Henson, R. N. (2018). The Hippocampal Film Editor: Sensitivity and Specificity to Event Boundaries in Continuous Experience. The Journal of Neuroscience: The Official Journal of the Society for Neuroscience, 38(47), 10057–10068. *Further studies the relationship between the boundaries produced by the event segmentation model, human-annotated boundaries, and hippocampal responses.*
