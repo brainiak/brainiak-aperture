@@ -131,3 +131,6 @@ dmypy.json
 
 # macOS
 .DS_Store
+
+# htfa temp files
+notebooks/htfa/*_frames/*.jpg
