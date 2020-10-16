@@ -122,9 +122,9 @@ def animate_connectome(nodes, connectomes, figdir='frames', force_refresh=False)
     inputs:
       nodes: a K by 3 array of node center locations
       
-      connectomes: a T by ((K^2 - K)/2) array of per-timepoint connectomes.
+      connectomes: a T by [((K^2 - K)/2) + K] array of per-timepoint connectomes.
                    Each timepoint's connectime is represented in a vectorized
-                   (squareform) format.
+                   format *including the diagonal* (i.e., self connections).
       
       figdir: where to save temporary files and final output
       
@@ -142,7 +142,7 @@ def animate_connectome(nodes, connectomes, figdir='frames', force_refresh=False)
     #save a jpg file for each frame (this takes a while, so don't re-do already made images)
     def get_frame(t, fname):
         if force_refresh or not os.path.exists(fname):
-            niplot.plot_connectome(sd.squareform(connectomes[t, :]),
+            niplot.plot_connectome(tc.vec2mat(connectomes[t, :]),
                                    nodes,
                                    node_color='k',
                                    edge_threshold='75%',
@@ -184,7 +184,7 @@ def mat2chord(connectome, cthresh=0.25):
         return pd.DataFrame(links)
     
     K = connectome.shape[0]
-    nodes = pd.DataFrame({'ID': range(K), 'Name': [f'{i}' for i in range(K)]})
+    nodes = pd.DataFrame({'ID': range(K), 'Name': [f'Node {i}' for i in range(K)]})
     
     links = mat2links(connectome, nodes['Name'])
     chord = hv.Chord((links, hv.Dataset(nodes, 'ID'))).select(value=(cthresh, None))
@@ -193,7 +193,7 @@ def mat2chord(connectome, cthresh=0.25):
     )
     return chord
 
-def animate_chord(connectomes, cthresh=0.25):
+def animate_chord(x, cthresh=0.25):
     '''
     inputs:
       connectomes: a T by [((K^2 - K)/2) + K] array of per-timepoint connectomes.
