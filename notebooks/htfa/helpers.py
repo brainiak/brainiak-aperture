@@ -1,9 +1,11 @@
 import numpy as np
 import pandas as pd
 import nibabel as nib
+import nilearn as nl
 from nilearn.input_data import NiftiMasker
 import nilearn.plotting as niplot
-import matplotlib as mpl
+import matplotlib as mlab
+import matplotlib.pyplot as plt
 import holoviews as hv
 import timecorr as tc
 import os
@@ -11,6 +13,34 @@ import warnings
 
 hv.extension('bokeh')
 hv.output(size=200)
+
+def opts(debug=False):
+    '''
+    Return a dictionary of parameters to pass to
+    brainiak.factoranalysis.htfa.HTFA
+    
+    inputs:
+      debug: set to True (default) to generate a quick test fit and False to
+             generate a (slower) more accurate fit.
+    '''
+    if debug:
+        return {'K': 10,
+                'max_global_iter': 3,
+                'max_local_iter': 3,
+                'voxel_ratio': 0.1,
+                'tr_ratio': 0.1,
+                'max_voxel_scale': 0.1,
+                'max_tr_scale': 0.1,
+                'verbose': True}
+    else:
+        return {'K': 50,
+                'max_global_iter': 25,
+                'max_local_iter': 10,
+                'voxel_ratio': 0.25,
+                'tr_ratio': 0.5,
+                'max_voxel_scale': 0.5,
+                'max_tr_scale': 0.5,
+                'verbose': False}
 
 def nii2cmu(nifti_file, mask_file=None):
     '''
@@ -117,7 +147,7 @@ def cmu2nii(Y, R, template=None):
     
     return nib.Nifti1Image(data, affine=img.affine)
 
-def animate_connectome(nodes, connectomes, figdir='frames', force_refresh=False):
+def animate_connectome(nodes, connectomes, figdir='frames', force_refresh=False): #move to helpers
     '''
     inputs:
       nodes: a K by 3 array of node center locations
@@ -142,29 +172,29 @@ def animate_connectome(nodes, connectomes, figdir='frames', force_refresh=False)
     #save a jpg file for each frame (this takes a while, so don't re-do already made images)
     def get_frame(t, fname):
         if force_refresh or not os.path.exists(fname):
-            niplot.plot_connectome(tc.vec2mat(connectomes[t, :]),
-                                   nodes,
-                                   node_color='k',
-                                   edge_threshold='75%',
-                                   output_file=fname)
+            nl.plotting.plot_connectome(tc.vec2mat(connectomes[t, :]),
+                                        nodes,
+                                        node_color='k',
+                                        edge_threshold='75%',
+                                        output_file=fname)
     
     timepoints = np.arange(connectomes.shape[0])
     fnames = [os.path.join(figdir, str(t) + '.jpg') for t in timepoints]
-    tmp = [get_frame(t, f) for zip(timepoints, fnames)]
+    tmp = [get_frame(t, f) for t, f in zip(timepoints, fnames)]
     
     #create a movie frame from each of the images we just made
-    mpl.pyplot.close()
-    fig = mpl.pyplot.figure()
+    fig = plt.figure()
     
     def get_im(fname):
         #print(fname)
-        mpl.pyplot.axis('off')
-        return mpl.pyplot.imshow(mpl.pyplot.imread(fname), animated=True)
+        plt.axis('off')
+        return plt.imshow(plt.imread(fname), animated=True)
     
-    ani = mpl.animation.FuncAnimation(fig, get_im, fnames, interval=50)    
+    ani = mlab.animation.FuncAnimation(fig, get_im, fnames, interval=50)
     return ani
 
-def mat2chord(connectome, cthresh=0.25):
+
+def mat2chord(connectome, cthresh=0.05):
     '''
     inputs:
       connectome: K by K connectivity matrix
@@ -186,14 +216,14 @@ def mat2chord(connectome, cthresh=0.25):
     K = connectome.shape[0]
     nodes = pd.DataFrame({'ID': range(K), 'Name': [f'Node {i}' for i in range(K)]})
     
-    links = mat2links(connectome, nodes['Name'])
+    links = mat2links(connectome, nodes['ID'])
     chord = hv.Chord((links, hv.Dataset(nodes, 'ID'))).select(value=(cthresh, None))
     chord.opts(
-        opts.Chord(cmap='Category20', edge_cmap='Category20', edge_color=dim('source').str(), labels='Name', node_color=dim('ID').str())
+        hv.opts.Chord(cmap='Category20', edge_cmap='Category20', edge_color=hv.dim('source').str(), labels='Name', node_color=hv.dim('ID').str())
     )
     return chord
 
-def animate_chord(x, cthresh=0.25):
+def animate_chord(x, cthresh=0.05):
     '''
     inputs:
       connectomes: a T by [((K^2 - K)/2) + K] array of per-timepoint connectomes.
@@ -204,8 +234,9 @@ def animate_chord(x, cthresh=0.25):
     
     outputs:
       hmap: a holoviews.HoloMap object containing an interactive animation
-      
     '''
+    warnings.simplefilter('ignore') #suppress BokehUserWarning for node colors
+    
     hv.output(max_frames=x.shape[0])
     renderer = hv.renderer('bokeh')
     return hv.HoloMap({t: mat2chord(tc.vec2mat(x[t, :]), cthresh=cthresh) for t in range(x.shape[0])}, kdims='Time (TRs)')
