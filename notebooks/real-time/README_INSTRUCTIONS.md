@@ -28,5 +28,5 @@ Before you can run this notebook, you will have to take the following steps to s
 #### Common Mistakes or Issues
 
 - If you get a blank blue screen when you open the localhost with the web server, then you forgot to follow Step 4 above.
-- The `/tmp/notebook-simdata` folder is in your root directory. To get there, do `cd ~`. You want to delete this `notebook-simdata` folder whenever you want to similate the synthetic data being produced in real-time.
+- The `/tmp/notebook-simdata` folder is in your root directory. To get there, do `cd /tmp`. You want to delete this `notebook-simdata` folder whenever you want to similate the synthetic data being produced in real-time.
 - If `rtCommon` can't be found, then you forgot to run Step 5 above.
