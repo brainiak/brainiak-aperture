@@ -1,7 +1,7 @@
 # Introduction and framing
 _Shvartsman et al. 2018_ framed a number of common fMRI analysis methods available in `BrainIAK` as matrix-normal models, and showed some benefits of this formulation. _Cai et al. 2020_ provided an alternate framing of the work focusing on the modeling of structured residuals. 
 
-Shvartsman, M., Sundaram, N., Aoi, M., Charles, A., Willke, T. L., & Cohen, J. D. (2018). Matrix-normal models for fMRI analysis. International Conference on Artificial Intelligence and Statistics, AISTATS 2018, 1914–1923.
+Shvartsman, M., Sundaram, N., Aoi, M., Charles, A., Willke, T. L., & Cohen, J. D. (2018). Matrix-normal models for fMRI analysis. International Conference on Artificial Intelligence and Statistics, AISTATS 2018, 1914–1923. Extended version available at https://arxiv.org/abs/1711.03058. 
 
 Cai, M. B., Shvartsman, M., Wu, A., Zhang, H., & Zhu, X. (2020). Incorporating structured assumptions with probabilistic graphical models in fMRI data analysis. Neuropsychologia, 144, 1–23. https://doi.org/10.1016/j.neuropsychologia.2020.107500
 
