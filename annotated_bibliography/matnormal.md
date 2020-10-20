@@ -12,8 +12,6 @@ _Magnus & Neudecker 1988_ is the standard reference for matrix calculus, and has
 
 Magnus, J. R., & Neudecker, H. (1988). Matrix differential calculus with applications in statistics and econometrics.
 
-Petersen, K. B., & Petersen, M. S. (2012). The Matrix Cookbook. https://doi.org/10.1.1.113.6244
-
 Petersen, K. B., & Petersen, M. S. (2012). The Matrix Cookbook. No longer available on its original website but can be found in many course materials, including here: https://www.math.uwaterloo.ca/~hwolkowi/matrixcookbook.pdf. 
 
 # Inference for seprable covariance models
