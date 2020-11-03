@@ -9,7 +9,9 @@ import matplotlib.pyplot as plt
 import holoviews as hv
 import timecorr as tc
 import os
+from brainiak.factoranalysis.htfa import HTFA
 import warnings
+import seaborn as sns
 
 hv.extension('bokeh')
 hv.output(size=200)
@@ -34,13 +36,96 @@ def opts(debug=False):
                 'verbose': True}
     else:
         return {'K': 50,
-                'max_global_iter': 25,
-                'max_local_iter': 10,
-                'voxel_ratio': 0.25,
-                'tr_ratio': 0.5,
-                'max_voxel_scale': 0.5,
-                'max_tr_scale': 0.5,
-                'verbose': False}
+                'max_global_iter': 10,
+                'max_local_iter': 5,
+                'voxel_ratio': 0.1,
+                'tr_ratio': 0.1,
+                'max_voxel_scale': 0.25,
+                'max_tr_scale': 0.25,
+                'verbose': True}
+
+def opts2str(params):
+    '''
+    convert params to filename
+    '''
+    return str(params).replace('{', '').replace('}', '').replace("'", '').replace(': ', '-').replace(', ', '_')
+
+def htfa2dict(htfa):
+    '''
+    turn htfa object into a pickleable dictionary
+    '''
+    return {'K': htfa.K, # init params
+         'n_subj': htfa.n_subj,
+         'max_global_iter': htfa.max_global_iter,
+         'max_local_iter': htfa.max_local_iter,
+         'threshold': htfa.threshold,
+         'nlss_method': htfa.nlss_method,
+         'nlss_loss': htfa.nlss_loss,
+         'jac': htfa.jac,
+         'x_scale': htfa.x_scale,
+         'tr_solver': htfa.tr_solver,
+         'weight_method': htfa.weight_method,
+         'upper_ratio': htfa.upper_ratio,
+         'lower_ratio': htfa.lower_ratio,
+         'tr_ratio': htfa.tr_ratio,
+         'voxel_ratio': htfa.voxel_ratio,
+         'max_voxel': htfa.max_voxel,
+         'max_tr': htfa.max_tr,
+         'verbose': htfa.verbose,
+         'prior_bcast_size': htfa.prior_bcast_size,
+         'prior_size': htfa.prior_size,
+         'local_posterior_': htfa.local_posterior_, # inferred params
+         'local_weights_': htfa.local_weights_,
+         'global_centers_cov_': htfa.global_centers_cov,
+         'global_centers_cov_scaled': htfa.global_centers_cov_scaled,
+         'global_posterior_': htfa.global_posterior_,
+         'global_prior_': htfa.global_prior_,
+         'global_widths_var': htfa.global_widths_var,
+         'global_widths_var_scaled': htfa.global_widths_var_scaled,
+         'map_offset': htfa.map_offset,
+         'n_dim': htfa.n_dim
+         }
+
+
+def dict2htfa(htfa_dict):
+    htfa = HTFA(K=htfa_dict['K'],
+                n_subj=htfa_dict['n_subj'],
+                max_voxel=htfa_dict['max_voxel'],
+                max_tr=htfa_dict['max_tr'],
+                verbose=False)
+    for k in htfa_dict.keys():
+        setattr(htfa, k, htfa_dict[k])
+    return htfa
+
+def global_params(htfa):
+    centers = htfa.get_centers(htfa.global_posterior_)
+    widths = htfa.get_widths(htfa.global_posterior_)
+    return centers, widths
+
+def local_params(htfa, n_timepoints):
+    centers = [htfa.get_centers(x) for x in np.array_split(htfa.local_posterior_, htfa.n_subj)]
+    widths = [htfa.get_widths(x) for x in np.array_split(htfa.local_posterior_, htfa.n_subj)]
+        
+    inds = np.hstack([0, np.cumsum(np.multiply(htfa.K, n_timepoints))])
+    weights = [htfa.local_weights_[inds[i]:inds[i+1]].reshape([htfa.K, 
+                                                               n_timepoints[i]]).T for i in np.arange(htfa.n_subj)]
+    return centers, widths, weights
+
+def plot_nodes(htfa, n_timepoints, cmap='Spectral', global_scale=100, local_scale=25):
+    colors = np.repeat(np.vstack([[0, 0, 0], sns.color_palette(cmap, htfa.n_subj)]), htfa.K, axis=0)
+    colors = [colors[i, :] for i in range(colors.shape[0])] # make colors into a list
+    
+    global_centers, global_widths = global_params(htfa)
+    local_centers, local_widths, _ = local_params(htfa, n_timepoints)
+    
+    centers = np.vstack([global_centers, np.vstack(local_centers)])
+    widths = np.vstack([global_widths, np.vstack(local_widths)])
+    widths /= np.max(widths)
+    
+    scales = np.repeat(np.hstack([np.array(global_scale), np.array(htfa.n_subj*[local_scale])]), htfa.K)
+    sizes = widths.T * scales
+    return nl.plotting.plot_connectome(np.eye(htfa.K * (1 + htfa.n_subj)), centers, node_color=colors, node_size=sizes)
+    
 
 def nii2cmu(nifti_file, mask_file=None):
     '''
@@ -98,7 +183,7 @@ def nii2cmu(nifti_file, mask_file=None):
     else:
         N = 1
     
-    Y = np.float64(mask.transform(nifti_file)).copy()
+    Y = np.float32(mask.transform(nifti_file)).copy()
     vmask = np.nonzero(np.array(np.reshape(mask.mask_img_.dataobj, (1, np.prod(mask.mask_img_.shape)), order='C')))[1]
     vox_coords = fullfact(img.shape[0:3])[vmask, ::-1]-1
     
@@ -147,7 +232,7 @@ def cmu2nii(Y, R, template=None):
     
     return nib.Nifti1Image(data, affine=img.affine)
 
-def animate_connectome(nodes, connectomes, figdir='frames', force_refresh=False): #move to helpers
+def animate_connectome(nodes, connectomes, cthresh='75%', figdir='frames', force_refresh=False): #move to helpers
     '''
     inputs:
       nodes: a K by 3 array of node center locations
@@ -175,7 +260,7 @@ def animate_connectome(nodes, connectomes, figdir='frames', force_refresh=False)
             nl.plotting.plot_connectome(tc.vec2mat(connectomes[t, :]),
                                         nodes,
                                         node_color='k',
-                                        edge_threshold='75%',
+                                        edge_threshold=cthresh,
                                         output_file=fname)
     
     timepoints = np.arange(connectomes.shape[0])
