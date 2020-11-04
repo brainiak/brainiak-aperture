@@ -20,3 +20,4 @@ https://ieeexplore.ieee.org/document/8462175
 6. Richard, H., Martin, L., Pinho, A. L., Pillow, J., & Thirion, B. (2019). Fast shared response model for fMRI data. arXiv:1909.12537. 
 https://arxiv.org/abs/1909.12537
 A fast SRM algorithm that relies on an intermediate atlas base representation. It provides considerable speed-up in time and memory usage hence it allows easy and fast large-scale analysis of naturalistic stimulus fMRI data.
+https://arxiv.org/abs/1909.12537
