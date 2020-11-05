@@ -115,6 +115,10 @@ def doRuns(cfg, fileInterface, projectComm):
     labels = np.load(os.path.join(cfg.imgDir, 'labels.npy'))
     mask = np.load(os.path.join(cfg.imgDir, 'mask.npy'))
     
+#     print(len(labels))
+#     print(len(labels[labels==1]))
+#     print(len(labels[labels==2]))
+    
     # declare the number of TRs we will shift the data to account for the hemodynamic lag
     num_shiftTRs = 3
     
@@ -186,12 +190,16 @@ def doRuns(cfg, fileInterface, projectComm):
             # identify the training data, keeping in mind that labels need to be shifted for HDL
             X_train = preprocessed_data[num_shiftTRs:num_trainingData,:]
             y_train = np.ravel(labels[0:num_trainingData - num_shiftTRs])
-            # we only care about non-zero trials
-#             nonzero_trials = y_train != 0
-#             X_train = X_train[nonzero_trials]
-#             y_train = y_train[nonzero_trials]
+            # we only care about non-rest trials
+            non_rest_trials = y_train != 0
+            X_train = X_train[non_rest_trials]
+            y_train = y_train[non_rest_trials]
             # train the classifier
             clf = svm.SVC(kernel='linear', C=1, gamma='auto').fit(X_train, y_train)
+            
+#             print(len(y_train))
+#             print(len(y_train[y_train==1]))
+#             print(len(y_train[y_train==2]))
 
             # print out the amount of time it took to train the classifier
             print('Classifier done training! Time it took: %.2f s' %(time.time() - start_time))
@@ -206,7 +214,14 @@ def doRuns(cfg, fileInterface, projectComm):
     # check the accuracy of the classifier
     X_test = preprocessed_data[num_trainingData+num_shiftTRs+1:]
     y_test = np.ravel(labels[num_trainingData+1:num_total_TRs - num_shiftTRs])
+    # we only care about non-rest trials
+    non_rest_trials = y_test != 0
+    X_test = X_test[non_rest_trials]
+    y_test = y_test[non_rest_trials]
     accuracy_score = clf.score(X_test, y_test)
+#     print(len(y_test))
+#     print(len(y_test[y_test==1]))
+#     print(len(y_test[y_test==2]))
     print('Accuracy of classifier on new data: %s' %accuracy_score)
   
     print(""
