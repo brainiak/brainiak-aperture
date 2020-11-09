@@ -1,0 +1,7 @@
+1. Hasson, U., Nir, Y., Levy, I., Fuhrmann, G., & Malach, R. (2004). Intersubject synchronization of cortical activity during natural vision. *Science*, *303*(5664), 1634-1640. [`DOI`](https://doi.org/10.1126/science.1089506) *Original application of ISC analysis to naturalistic movie-watching fMRI data, demonstrating shared stimulus-evoked responses across subjects.*
+
+2. Nastase, S. A., Gazzola, V., Hasson, U., & Keysers, C. (2019). Measuring shared responses across subjects using intersubject correlation. *Social Cognitive and Affective Neuroscience*, *14*(6), 667-685. [`DOI`](https://doi.org/10.1093/scan/nsz037) *Recent tutorial article that reviews ISC analysis and related methods.*
+
+3. Hasson, U., Yang, E., Vallines, I., Heeger, D. J., & Rubin, N. (2008). A hierarchy of temporal receptive windows in human cortex. *Journal of Neuroscience*, *28*(10), 2539-2550. *ISC analysis is used to demonstrate that, under naturalistic conditions, high-level brain areas integrate stimulus-related information over long periods of time.*
+
+4. Chen, G., Shin, Y. W., Taylor, P. A., Glen, D. R., Reynolds, R. C., Israel, R. B., & Cox, R. W. (2016). Untangling the relatedness among correlations, part I: nonparametric approaches to inter-subject correlation analysis at the group level. *NeuroImage*, *142*, 248-259. [`DOI`](https://doi.org/10.1016/j.neuroimage.2016.05.023) *The first in a series of three papers that dissect the statistical assessment of pairwise ISC.*
