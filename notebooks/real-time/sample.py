@@ -36,6 +36,7 @@ from sklearn import svm
 import nilearn
 from nilearn.masking import apply_mask
 from scipy.stats import zscore
+from sklearn.preprocessing import StandardScaler
 
 import warnings # ignore warnings when importing dicomreaders below
 with warnings.catch_warnings():
@@ -111,19 +112,6 @@ def doRuns(cfg, fileInterface, projectComm):
     num_trainingData = cfg.numTrainingTRs
     num_total_TRs = cfg.numSynthetic
 
-    # load the labels and mask
-    labels = np.load(os.path.join(cfg.imgDir, 'labels.npy'))
-    mask = np.load(os.path.join(cfg.imgDir, 'mask.npy'))
-    
-#     print(len(labels))
-#     print(len(labels[labels==1]))
-#     print(len(labels[labels==2]))
-    
-    # declare the number of TRs we will shift the data to account for the hemodynamic lag
-    num_shiftTRs = 3
-    
-    # set up a matrix that will hold all of the preprocessed data
-    preprocessed_data = np.full((num_total_TRs, mask.sum()), np.nan)
     for this_TR in np.arange(num_total_TRs):
         # declare variables that are needed to use 'readRetryDicomFromFileInterface'
         timeout_file = 5 # small number because of demo, can increase for real-time
@@ -152,6 +140,19 @@ def doRuns(cfg, fileInterface, projectComm):
         #       [1] dicomData (with class 'pydicom.dataset.FileDataset')
         dicomData = readRetryDicomFromFileInterface(fileInterface, fileName,
             timeout_file)
+        
+        # declare various things if it's the first TR
+        if this_TR == 0:
+            # load the labels and mask
+            labels = np.load(os.path.join(cfg.imgDir, 'labels.npy'))
+            print(os.path.join(cfg.imgDir, 'labels.npy'))
+            mask = np.load(os.path.join(cfg.imgDir, 'mask.npy'))
+            # declare the number of TRs we will shift the data to account for the hemodynamic lag
+            num_shiftTRs = 3
+            # shift the labels to account for hemodynamic lag
+            shifted_labels = np.concatenate([np.full((num_shiftTRs, 1), np.nan),labels])
+            # set up a matrix that will hold all of the preprocessed data
+            preprocessed_data = np.full((num_total_TRs, mask.sum()), np.nan)
 
         # normally, we would use the 'convertDicomFileToNifti' function with dicomData as 
         #   input but here we have doing things manually to accomodate the synthetic data
@@ -168,9 +169,7 @@ def doRuns(cfg, fileInterface, projectComm):
             # make a nan matrix that will hold all the training data
             training_data = np.full((num_trainingData,np.sum(mask)),np.nan)
 
-        # preprocess the training data by applying the mask and zscoring
-    #     masked_data = apply_mask(niftiObject,mask_nib).reshape(np.sum(mask),1)
-    #     preprocessed_data[this_TR,:] = zscore(masked_data, axis=0).T
+        # preprocess the training data by applying the mask
         preprocessed_data[this_TR,:] = np.ravel(apply_mask(niftiObject,mask_nib).reshape(np.sum(mask),1))
 
         ## Now we divide into one of three possible steps
@@ -187,19 +186,16 @@ def doRuns(cfg, fileInterface, projectComm):
             # snapshot of time to keep track of how long it takes to train the classifier
             start_time = time.time()
 
-            # identify the training data, keeping in mind that labels need to be shifted for HDL
-            X_train = preprocessed_data[num_shiftTRs:num_trainingData,:]
-            y_train = np.ravel(labels[0:num_trainingData - num_shiftTRs])
-            # we only care about non-rest trials
-            non_rest_trials = y_train != 0
-            X_train = X_train[non_rest_trials]
-            y_train = y_train[non_rest_trials]
-            # train the classifier
-            clf = svm.SVC(kernel='linear', C=1, gamma='auto').fit(X_train, y_train)
-            
-#             print(len(y_train))
-#             print(len(y_train[y_train==1]))
-#             print(len(y_train[y_train==2]))
+            scaler = StandardScaler()
+            X_train = preprocessed_data[num_shiftTRs:num_trainingData]
+            y_train = shifted_labels[num_shiftTRs:num_trainingData].reshape(-1,)
+            # we don't want to include rest data
+            X_train_noRest = X_train[y_train != 0]
+            y_train_noRest = y_train[y_train != 0]
+            # and we want to zscore the bold data
+            X_train_noRest_zscored = scaler.fit_transform(X_train_noRest)
+            clf = svm.SVC(kernel='linear', C=0.01, class_weight='balanced')
+            clf.fit(X_train_noRest_zscored, y_train_noRest)
 
             # print out the amount of time it took to train the classifier
             print('Classifier done training! Time it took: %.2f s' %(time.time() - start_time))
@@ -210,19 +206,18 @@ def doRuns(cfg, fileInterface, projectComm):
             prediction = clf.predict(preprocessed_data[this_TR,:].reshape(-1,1).T)
             print('Plotting classifier prediction for TR %s' %this_TR)
             projUtils.sendResultToWeb(projectComm, runNum, int(this_TR), float(prediction))
-    
-    # check the accuracy of the classifier
-    X_test = preprocessed_data[num_trainingData+num_shiftTRs+1:]
-    y_test = np.ravel(labels[num_trainingData+1:num_total_TRs - num_shiftTRs])
-    # we only care about non-rest trials
-    non_rest_trials = y_test != 0
-    X_test = X_test[non_rest_trials]
-    y_test = y_test[non_rest_trials]
-    accuracy_score = clf.score(X_test, y_test)
-#     print(len(y_test))
-#     print(len(y_test[y_test==1]))
-#     print(len(y_test[y_test==2]))
+
+    X_test = preprocessed_data[num_trainingData+1:]
+    y_test = shifted_labels[num_trainingData+1:num_total_TRs].reshape(-1,)
+    # we don't want to include the rest data
+    X_test_noRest = X_test[y_test != 0]
+    y_test_noRest = y_test[y_test != 0]
+    # and we want to zscore the bold data
+    X_test_noRest_zscored = scaler.transform(X_test_noRest)
+    accuracy_score = clf.score(X_test_noRest_zscored, y_test_noRest)
     print('Accuracy of classifier on new data: %s' %accuracy_score)
+    # print(y_test_noRest)
+    # clf.predict(X_test_noRest_zscored)
   
     print(""
     "###################################################################################\n"
