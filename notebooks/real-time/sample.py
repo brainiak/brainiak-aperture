@@ -112,18 +112,6 @@ def doRuns(cfg, fileInterface, projectComm):
     num_trainingData = cfg.numTrainingTRs
     num_total_TRs = cfg.numSynthetic
 
-    # load the labels and mask
-    labels = np.load(os.path.join(cfg.imgDir, 'labels.npy'))
-    print(os.path.join(cfg.imgDir, 'labels.npy'))
-    mask = np.load(os.path.join(cfg.imgDir, 'mask.npy'))
-
-    # declare the number of TRs we will shift the data to account for the hemodynamic lag
-    num_shiftTRs = 3
-    # shift the labels to account for hemodynamic lag
-    shifted_labels = np.concatenate([np.full((num_shiftTRs, 1), np.nan),labels])
-
-    # set up a matrix that will hold all of the preprocessed data
-    preprocessed_data = np.full((num_total_TRs, mask.sum()), np.nan)
     for this_TR in np.arange(num_total_TRs):
         # declare variables that are needed to use 'readRetryDicomFromFileInterface'
         timeout_file = 5 # small number because of demo, can increase for real-time
@@ -152,6 +140,19 @@ def doRuns(cfg, fileInterface, projectComm):
         #       [1] dicomData (with class 'pydicom.dataset.FileDataset')
         dicomData = readRetryDicomFromFileInterface(fileInterface, fileName,
             timeout_file)
+        
+        # declare various things if it's the first TR
+        if this_TR == 0:
+            # load the labels and mask
+            labels = np.load(os.path.join(cfg.imgDir, 'labels.npy'))
+            print(os.path.join(cfg.imgDir, 'labels.npy'))
+            mask = np.load(os.path.join(cfg.imgDir, 'mask.npy'))
+            # declare the number of TRs we will shift the data to account for the hemodynamic lag
+            num_shiftTRs = 3
+            # shift the labels to account for hemodynamic lag
+            shifted_labels = np.concatenate([np.full((num_shiftTRs, 1), np.nan),labels])
+            # set up a matrix that will hold all of the preprocessed data
+            preprocessed_data = np.full((num_total_TRs, mask.sum()), np.nan)
 
         # normally, we would use the 'convertDicomFileToNifti' function with dicomData as 
         #   input but here we have doing things manually to accomodate the synthetic data
