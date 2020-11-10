@@ -1,6 +1,6 @@
 """-----------------------------------------------------------------------------
 
-sample.py (Last Updated: 10/31/2020)
+sample.py (Last Updated: 11/10/2020)
 
 The purpose of this script is to run a sample project for the BrainIAK Aperture 
 paper. This sample project script will be wrapped by the projectInterface and 
@@ -140,19 +140,6 @@ def doRuns(cfg, fileInterface, projectComm):
         #       [1] dicomData (with class 'pydicom.dataset.FileDataset')
         dicomData = readRetryDicomFromFileInterface(fileInterface, fileName,
             timeout_file)
-        
-        # declare various things if it's the first TR
-        if this_TR == 0:
-            # load the labels and mask
-            labels = np.load(os.path.join(cfg.imgDir, 'labels.npy'))
-            print(os.path.join(cfg.imgDir, 'labels.npy'))
-            mask = np.load(os.path.join(cfg.imgDir, 'mask.npy'))
-            # declare the number of TRs we will shift the data to account for the hemodynamic lag
-            num_shiftTRs = 3
-            # shift the labels to account for hemodynamic lag
-            shifted_labels = np.concatenate([np.full((num_shiftTRs, 1), np.nan),labels])
-            # set up a matrix that will hold all of the preprocessed data
-            preprocessed_data = np.full((num_total_TRs, mask.sum()), np.nan)
 
         # normally, we would use the 'convertDicomFileToNifti' function with dicomData as 
         #   input but here we have doing things manually to accomodate the synthetic data
@@ -161,16 +148,24 @@ def doRuns(cfg, fileInterface, projectComm):
         niftiFilename = base + '.nii'
         convertDicomFileToNifti(fileName, niftiFilename)
         niftiObject = readNifti(niftiFilename)
-
-        # things to set up if this is the first TR
+        
+        # declare various things if it's the first TR
         if this_TR == 0:
-            # use the affine matrix from the niftiObject and transform mask to nifti1image
-            mask_nib = nib.Nifti1Image(mask.T, affine=niftiObject.affine)
-            # make a nan matrix that will hold all the training data
-            training_data = np.full((num_trainingData,np.sum(mask)),np.nan)
+            # load the labels and mask
+            labels = np.load(os.path.join(cfg.imgDir, 'labels.npy'))
+            print(os.path.join(cfg.imgDir, 'labels.npy'))
+            ROI_nib = nib.load(os.path.join(currPath,'ROI_mask.nii.gz'))
+            ROI_mask = np.array(ROI_nib.dataobj)
+            mask_nib = nib.Nifti1Image(ROI_mask.T, affine=niftiObject.affine)
+            # declare the number of TRs we will shift the data to account for the hemodynamic lag
+            num_shiftTRs = 3
+            # shift the labels to account for hemodynamic lag
+            shifted_labels = np.concatenate([np.full((num_shiftTRs, 1), np.nan),labels])
+            # set up a matrix that will hold all of the preprocessed data
+            preprocessed_data = np.full((num_total_TRs, int(ROI_mask.sum())), np.nan)
 
         # preprocess the training data by applying the mask
-        preprocessed_data[this_TR,:] = np.ravel(apply_mask(niftiObject,mask_nib).reshape(np.sum(mask),1))
+        preprocessed_data[this_TR,:] = np.ravel(apply_mask(niftiObject,mask_nib).reshape(int(ROI_mask.sum()),1))
 
         ## Now we divide into one of three possible steps
 
@@ -216,8 +211,8 @@ def doRuns(cfg, fileInterface, projectComm):
     X_test_noRest_zscored = scaler.transform(X_test_noRest)
     accuracy_score = clf.score(X_test_noRest_zscored, y_test_noRest)
     print('Accuracy of classifier on new data: %s' %accuracy_score)
-    # print(y_test_noRest)
-    # clf.predict(X_test_noRest_zscored)
+#     print(y_test_noRest)
+#     print(clf.predict(X_test_noRest_zscored))
   
     print(""
     "###################################################################################\n"
