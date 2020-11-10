@@ -1,11 +1,10 @@
 """-----------------------------------------------------------------------------
 
-sample.py (Last Updated: 10/17/2020)
+sample.py (Last Updated: 11/10/2020)
 
-The purpose of this script is to actually to run the sample project.
-Specifically, it will initiate a file watcher that searches for incoming dicom
-files, do some sort of analysis based on the dicom file that's been received,
-and then output the answer.
+The purpose of this script is to run a sample project for the BrainIAK Aperture 
+paper. This sample project script will be wrapped by the projectInterface and 
+it will be made accessible on the Web Server.
 
 The purpose of this *particular* script is to demonstrated how you can use the
 various scripts, functions, etc. we have developed for your use! The functions
@@ -17,7 +16,7 @@ Finally, this script is called from 'projectMain.py', which is called from
 -----------------------------------------------------------------------------"""
 
 
-### ADD FULL PATH TO RTCLOUD REPO AND NOTEBOOK ###
+# add the full path to the rtcloud
 import os
 path_to_rtcloud = os.getenv('RTCLOUD_PATH')
 if path_to_rtcloud == None:
@@ -26,16 +25,23 @@ if path_to_rtcloud == None:
 
 # import other important modules
 import sys
+import time
 import argparse
 import numpy as np
 import nibabel as nib
 import scipy.io as sio
+from nilearn.input_data import NiftiMasker
+from sklearn import preprocessing
+from sklearn import svm
+import nilearn
+from nilearn.masking import apply_mask
+from scipy.stats import zscore
+from sklearn.preprocessing import StandardScaler
 
-print(''
-    '|||||||||||||||||||||||||||| IGNORE THIS WARNING ||||||||||||||||||||||||||||')
-from nibabel.nicom import dicomreaders
-print(''
-    '|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||')
+import warnings # ignore warnings when importing dicomreaders below
+with warnings.catch_warnings():
+    warnings.filterwarnings("ignore", category=UserWarning)
+    from nibabel.nicom import dicomreaders
 
 # obtain full path for current directory: '.../rt-cloud/projects/sample'
 currPath = os.path.dirname(os.path.realpath(__file__))
@@ -73,13 +79,8 @@ def doRuns(cfg, fileInterface, projectComm):
     runNum = cfg.runNum[0]
 
     # obtain the path for the directory where the subject's dicoms live
-    if cfg.isSynthetic:
-        cfg.dicomDir = cfg.imgDir
-    else:
-        subj_imgDir = "{}.{}.{}".format(cfg.datestr, cfg.subjectName, cfg.subjectName)
-        cfg.dicomDir = os.path.join(cfg.imgDir, subj_imgDir)
-    print("Location of the subject's dicoms: \n%s\n" %cfg.dicomDir,
-    "-----------------------------------------------------------------------------")
+    cfg.dicomDir = cfg.imgDir
+    print("Location of the subject's dicoms: %s\n" %cfg.dicomDir)
 
     # initialize a watch for the entire dicom folder (it doesn't look for a
     #   specific dicom) using the function 'initWatch' in 'fileClient.py'
@@ -88,7 +89,6 @@ def doRuns(cfg, fileInterface, projectComm):
     #       [2] cfg.dicomNamePattern (the naming pattern of dicom files)
     #       [3] cfg.minExpectedDicomSize (a check on size to make sure we don't
     #               accidentally grab a dicom before it's fully acquired)
-#     print("• initalize a watch for the dicoms using 'initWatch'")
     fileInterface.initWatch(cfg.dicomDir, cfg.dicomNamePattern,
         cfg.minExpectedDicomSize)
 
@@ -104,13 +104,14 @@ def doRuns(cfg, fileInterface, projectComm):
     #
     # here, we are clearing an already existing plot
     print("\n\nClear any pre-existing plot using 'sendResultToWeb'")
+    print(''
+          '###################################################################################')
     projUtils.sendResultToWeb(projectComm, runNum, None, None)
 
+    # declare the total number of TRs
+    num_trainingData = cfg.numTrainingTRs
+    num_total_TRs = cfg.numSynthetic
 
-    num_total_TRs = 10  # number of TRs to use for example 1
-    if cfg.isSynthetic:
-        num_total_TRs = cfg.numSynthetic
-    all_avg_activations = np.zeros((num_total_TRs, 1))
     for this_TR in np.arange(num_total_TRs):
         # declare variables that are needed to use 'readRetryDicomFromFileInterface'
         timeout_file = 5 # small number because of demo, can increase for real-time
@@ -126,11 +127,6 @@ def doRuns(cfg, fileInterface, projectComm):
         #       [1] fullFileName (the filename of the dicom that should be grabbed)
         fileName = getDicomFileName(cfg, scanNum, this_TR)
 
-        print(''
-        '################################## TR number %d  ##################################' %(this_TR))
-        print("\nReading dicom file found in %s" %fileName)
-        
-        
         # use 'readRetryDicomFromFileInterface' in 'readDicom.py' to wait for dicom
         #   files to come in (by using 'watchFile' in 'fileClient.py') and then
         #   reading the dicom file once it receives it detected having received it
@@ -145,43 +141,84 @@ def doRuns(cfg, fileInterface, projectComm):
         dicomData = readRetryDicomFromFileInterface(fileInterface, fileName,
             timeout_file)
 
-        if cfg.isSynthetic:
-            base, ext = os.path.splitext(fileName)
-            assert ext == '.dcm'
-            niftiFilename = base + '.nii'
-            print('↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓ IGNORE THIS WARNING ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓')
-            convertDicomFileToNifti(fileName, niftiFilename)
-            print('↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑')
-            niftiObject = readNifti(niftiFilename)
-        else:
-            # use 'dicomreaders.mosaic_to_nii' to convert the dicom data into a nifti
-            #   object. additional steps need to be taken to get the nifti object in
-            #   the correct orientation, but we will ignore those steps here. refer to
-            #   the 'advanced sample project' for more info about that
-            print("\nProcessing DICOM file to nifti file")
-            niftiObject = dicomreaders.mosaic_to_nii(dicomData)
+        # normally, we would use the 'convertDicomFileToNifti' function with dicomData as 
+        #   input but here we have doing things manually to accomodate the synthetic data
+        base, ext = os.path.splitext(fileName)
+        assert ext == '.dcm'
+        niftiFilename = base + '.nii'
+        convertDicomFileToNifti(fileName, niftiFilename)
+        niftiObject = readNifti(niftiFilename)
+        
+        # declare various things if it's the first TR
+        if this_TR == 0:
+            # load the labels and mask
+            labels = np.load(os.path.join(cfg.imgDir, 'labels.npy'))
+            print(os.path.join(cfg.imgDir, 'labels.npy'))
+            ROI_nib = nib.load(os.path.join(currPath,'ROI_mask.nii.gz'))
+            ROI_mask = np.array(ROI_nib.dataobj)
+            mask_nib = nib.Nifti1Image(ROI_mask.T, affine=niftiObject.affine)
+            # declare the number of TRs we will shift the data to account for the hemodynamic lag
+            num_shiftTRs = 3
+            # shift the labels to account for hemodynamic lag
+            shifted_labels = np.concatenate([np.full((num_shiftTRs, 1), np.nan),labels])
+            # set up a matrix that will hold all of the preprocessed data
+            preprocessed_data = np.full((num_total_TRs, int(ROI_mask.sum())), np.nan)
 
-        # take the average of all the activation values
-        avg_niftiData = np.mean(niftiObject.get_data())
-        avg_niftiData = np.round(avg_niftiData,decimals=2)
-        print("Average activation value: %f" %(avg_niftiData))
+        # preprocess the training data by applying the mask
+        preprocessed_data[this_TR,:] = np.ravel(apply_mask(niftiObject,mask_nib).reshape(int(ROI_mask.sum()),1))
 
+        ## Now we divide into one of three possible steps
 
-        # use 'sendResultToWeb' from 'projectUtils.py' to send the result to the
-        #   web browser to be plotted in the --Data Plots-- tab.
-        print("Plotting datapoint")
-        projUtils.sendResultToWeb(projectComm, runNum, int(this_TR), float(avg_niftiData))
+        # STEP 1: collect the training data
+        if this_TR < num_trainingData:
+            print('Collected training data for TR %s' %this_TR)
+        # STEP 2: train the SVM model
+        elif this_TR == num_trainingData:
+            print(''
+                  '###################################################################################')
+            print('Done collecting training data! \nStart training the classifier.')
 
-        # save the activations value info into a vector that can be saved later
-        all_avg_activations[this_TR] = avg_niftiData
+            # snapshot of time to keep track of how long it takes to train the classifier
+            start_time = time.time()
 
+            scaler = StandardScaler()
+            X_train = preprocessed_data[num_shiftTRs:num_trainingData]
+            y_train = shifted_labels[num_shiftTRs:num_trainingData].reshape(-1,)
+            # we don't want to include rest data
+            X_train_noRest = X_train[y_train != 0]
+            y_train_noRest = y_train[y_train != 0]
+            # and we want to zscore the bold data
+            X_train_noRest_zscored = scaler.fit_transform(X_train_noRest)
+            clf = svm.SVC(kernel='linear', C=0.01, class_weight='balanced')
+            clf.fit(X_train_noRest_zscored, y_train_noRest)
 
+            # print out the amount of time it took to train the classifier
+            print('Classifier done training! Time it took: %.2f s' %(time.time() - start_time))
+            print(''
+                  '###################################################################################')
+        elif this_TR > num_trainingData:
+            # apply the classifier to new data to obtain prediction
+            prediction = clf.predict(preprocessed_data[this_TR,:].reshape(-1,1).T)
+            print('Plotting classifier prediction for TR %s' %this_TR)
+            projUtils.sendResultToWeb(projectComm, runNum, int(this_TR), float(prediction))
+
+    X_test = preprocessed_data[num_trainingData+1:]
+    y_test = shifted_labels[num_trainingData+1:num_total_TRs].reshape(-1,)
+    # we don't want to include the rest data
+    X_test_noRest = X_test[y_test != 0]
+    y_test_noRest = y_test[y_test != 0]
+    # and we want to zscore the bold data
+    X_test_noRest_zscored = scaler.transform(X_test_noRest)
+    accuracy_score = clf.score(X_test_noRest_zscored, y_test_noRest)
+    print('Accuracy of classifier on new data: %s' %accuracy_score)
+#     print(y_test_noRest)
+#     print(clf.predict(X_test_noRest_zscored))
+  
     print(""
-    "-----------------------------------------------------------------------------\n"
+    "###################################################################################\n"
     "REAL-TIME EXPERIMENT COMPLETE!")
 
     return
-
 
 def main(argv=None):
     """
@@ -224,7 +261,7 @@ def main(argv=None):
     #       [1] args.filesremote (to retrieve dicom files from the remote server)
     #       [2] projectComm (communication pipe that is set up above)
     fileInterface = FileInterface(filesremote=args.filesremote, commPipes=projectComm)
-
+    
     # now that we have the necessary variables, call the function 'doRuns' in order
     #   to actually start reading dicoms and doing your analyses of interest!
     #   INPUT:

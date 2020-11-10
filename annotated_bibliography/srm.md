@@ -1,0 +1,7 @@
+1. Chen, P. H. C., Chen, J., Yeshurun, Y., Hasson, U., Haxby, J., & Ramadge, P. J. (2015). A reduced-dimension fMRI shared response model. In C. Cortes, N. D. Lawrence, D. D. Lee, M. Sugiyama, R. Garnett (Eds.), *Advances in Neural Information Processing Systems, vol. 28* (pp. 460-468). [`link`](https://papers.nips.cc/paper/5855-a-reduced-dimension-fmri-shared-response-model) *Introduces the SRM method of functional alignment with several performance benchmarks.*
+
+2. Haxby, J. V., Guntupalli, J. S., Nastase, S. A., & Feilong, M. (2020). Hyperalignment: modeling shared information encoded in idiosyncratic cortical topographies. *eLife*, *9*, e56601. [`DOI`](https://doi.org/10.7554/eLife.56601) *Recent review of hyperalignment and related functional alignment methods.*
+
+3. Chen, J., Leong, Y. C., Honey, C. J., Yong, C. H., Norman, K. A., & Hasson, U. (2017). Shared memories reveal shared structure in neural activity across individuals. *Nature Neuroscience*, *20*(1), 115-125. [`DOI`](https://doi.org/10.1038/nn.4450) *SRM is used to discover the dimensionality of shared representations across subjects.*
+
+4. Nastase, S. A., Liu, Y. F., Hillman, H., Norman, K. A., & Hasson, U. (2020). Leveraging shared connectivity to aggregate heterogeneous datasets into a common response space. *NeuroImage*, *217*, 116865. [`DOI`](https://doi.org/10.1016/j.neuroimage.2020.116865) *This paper demonstrates that applying SRM to functional connectivity data can yield a shared response space across disjoint datasets with different subjects and stimuli.*
