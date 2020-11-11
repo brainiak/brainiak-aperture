@@ -48,11 +48,10 @@ currPath = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(path_to_rtcloud)
 # import project modules from rt-cloud
 from rtCommon.utils import loadConfigFile
-from rtCommon.fileClient import FileInterface
-import rtCommon.projectUtils as projUtils
+import rtCommon.clientInterface as clientInterface
 from rtCommon.imageHandling import readRetryDicomFromFileInterface, getDicomFileName, convertDicomImgToNifti, convertDicomFileToNifti, readNifti, convertDicomFileToNifti
 
-def doRuns(cfg, fileInterface, projectComm):
+def doRuns(cfg, fileInterface, subjInterface):
     """
     This function is called by 'main()' below. Here, we use the 'fileInterface'
     to read in dicoms (presumably from the scanner, but here it's from a folder
@@ -106,7 +105,7 @@ def doRuns(cfg, fileInterface, projectComm):
     print("\n\nClear any pre-existing plot using 'sendResultToWeb'")
     print(''
           '###################################################################################')
-    projUtils.sendResultToWeb(projectComm, runNum, None, None)
+    subjInterface.sendClassificationResult(runNum, None, None)
 
     # declare the total number of TRs
     num_trainingData = cfg.numTrainingTRs
@@ -197,10 +196,14 @@ def doRuns(cfg, fileInterface, projectComm):
             print(''
                   '###################################################################################')
         elif this_TR > num_trainingData:
-            # apply the classifier to new data to obtain prediction
-            prediction = clf.predict(preprocessed_data[this_TR,:].reshape(-1,1).T)
-            print('Plotting classifier prediction for TR %s' %this_TR)
-            projUtils.sendResultToWeb(projectComm, runNum, int(this_TR), float(prediction))
+            # apply the classifier to new data to obtain prediction IF not a rest trial
+            if shifted_labels[this_TR] != 0:
+                prediction = clf.predict(scaler.transform(preprocessed_data[this_TR,:].reshape(1,-1)))
+                print(f'Plotting classifier prediction for TR {this_TR}: {prediction}')
+                subjInterface.sendClassificationResult(runNum, int(this_TR), float(prediction))
+            else:
+                print(f'Skipping classification because it is a rest trial')
+
 
     X_test = preprocessed_data[num_trainingData+1:]
     y_test = shifted_labels[num_trainingData+1:num_total_TRs].reshape(-1,)
@@ -211,8 +214,8 @@ def doRuns(cfg, fileInterface, projectComm):
     X_test_noRest_zscored = scaler.transform(X_test_noRest)
     accuracy_score = clf.score(X_test_noRest_zscored, y_test_noRest)
     print('Accuracy of classifier on new data: %s' %accuracy_score)
-#     print(y_test_noRest)
-#     print(clf.predict(X_test_noRest_zscored))
+    # print(y_test_noRest)
+    # print(clf.predict(X_test_noRest_zscored))
   
     print(""
     "###################################################################################\n"
@@ -237,11 +240,6 @@ def main(argv=None):
                            help='Comma separated list of run numbers')
     argParser.add_argument('--scans', '-s', default='', type=str,
                            help='Comma separated list of scan number')
-    # This parameter is used for projectInterface
-    argParser.add_argument('--commpipe', '-q', default=None, type=str,
-                           help='Named pipe to communicate with projectInterface')
-    argParser.add_argument('--filesremote', '-x', default=False, action='store_true',
-                           help='retrieve dicom files from the remote server')
     args = argParser.parse_args(argv)
 
     # load the experiment configuration file
@@ -252,15 +250,14 @@ def main(argv=None):
         cfg.imgDir = os.path.join(currPath, 'dicomDir')
     cfg.codeDir = currPath
 
-    # open up the communication pipe using 'projectInterface'
-    projectComm = projUtils.initProjectComm(args.commpipe, args.filesremote)
-
-    # initiate the 'fileInterface' class, which will allow you to read and write
+    # Make an RPC connection to the projectServer
+    # The 'fileInterface' class, which will allow you to read and write
     #   files and many other things using functions found in 'fileClient.py'
-    #   INPUT:
-    #       [1] args.filesremote (to retrieve dicom files from the remote server)
-    #       [2] projectComm (communication pipe that is set up above)
-    fileInterface = FileInterface(filesremote=args.filesremote, commPipes=projectComm)
+    # The 'subjInterface' class will allow us to send classification results
+    #   as feedback to the subject in the MRI scanner
+    clientRPC = clientInterface.ClientRPC()
+    fileInterface = clientRPC.fileInterface
+    subjInterface = clientRPC.subjInterface
     
     # now that we have the necessary variables, call the function 'doRuns' in order
     #   to actually start reading dicoms and doing your analyses of interest!
@@ -269,8 +266,8 @@ def main(argv=None):
     #       [2] fileInterface (this will allow a script from the cloud to access files
     #               from the stimulus computer that receives dicoms from the Siemens
     #               console computer)
-    #       [3] projectComm (communication pipe to talk with projectInterface)
-    doRuns(cfg, fileInterface, projectComm)
+    #       [3] subjInterface for sending classification results
+    doRuns(cfg, fileInterface, subjInterface)
 
     return 0
 
