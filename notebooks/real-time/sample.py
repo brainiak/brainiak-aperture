@@ -196,10 +196,13 @@ def doRuns(cfg, fileInterface, subjInterface):
             print(''
                   '###################################################################################')
         elif this_TR > num_trainingData:
-            # apply the classifier to new data to obtain prediction
-            prediction = clf.predict(preprocessed_data[this_TR,:].reshape(-1,1).T)
-            print(f'Plotting classifier prediction for TR {this_TR}: {prediction}')
-            subjInterface.sendClassificationResult(runNum, int(this_TR), float(prediction))
+            # apply the classifier to new data to obtain prediction IF not a rest trial
+            if shifted_labels[this_TR] != 0:
+                prediction = clf.predict(scaler.transform(preprocessed_data[this_TR,:].reshape(1,-1)))
+                print(f'Plotting classifier prediction for TR {this_TR}: {prediction}')
+                subjInterface.sendClassificationResult(runNum, int(this_TR), float(prediction))
+            else:
+                print(f'Skipping classification because it is a rest trial')
 
 
     X_test = preprocessed_data[num_trainingData+1:]
