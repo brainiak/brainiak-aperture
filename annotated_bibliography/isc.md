@@ -2,6 +2,6 @@
 
 2. Nastase, S. A., Gazzola, V., Hasson, U., & Keysers, C. (2019). Measuring shared responses across subjects using intersubject correlation. *Social Cognitive and Affective Neuroscience*, *14*(6), 667-685. [`DOI`](https://doi.org/10.1093/scan/nsz037) *Recent tutorial article that reviews ISC analysis and shows different ways to compute statistics for ISC.*
 
-3. Hasson, U., Yang, E., Vallines, I., Heeger, D. J., & Rubin, N. (2008). A hierarchy of temporal receptive windows in human cortex. *Journal of Neuroscience*, *28*(10), 2539-2550. https://doi.org/10.1523/JNEUROSCI.5487-07.2008. *ISC analysis is used to demonstrate that, under naturalistic conditions, brain areas integrate stimulus-related information at different timescales.*
+3. Hasson, U., Yang, E., Vallines, I., Heeger, D. J., & Rubin, N. (2008). A hierarchy of temporal receptive windows in human cortex. *Journal of Neuroscience*, *28*(10), 2539-2550. [`DOI`](https://doi.org/10.1523/JNEUROSCI.5487-07.2008) *ISC analysis is used to demonstrate that, under naturalistic conditions, brain areas integrate stimulus-related information at different timescales.*
 
 4. Chen, G., Shin, Y. W., Taylor, P. A., Glen, D. R., Reynolds, R. C., Israel, R. B., & Cox, R. W. (2016). Untangling the relatedness among correlations, part I: nonparametric approaches to inter-subject correlation analysis at the group level. *NeuroImage*, *142*, 248-259. [`DOI`](https://doi.org/10.1016/j.neuroimage.2016.05.023) *The first in a series of three papers that describe  the statistical assessment of pairwise ISC.*
