@@ -2,5 +2,5 @@
 
 2. Manning JR, Zhu X, Willke TL, Ranganath R, Stachenfeld K, Hasson U, Blei DM, Norman KA (2018). A probabilistic approach to discovering dynamic full-brain functional connectivity patterns.  *NeuroImage*, 180: 243-252. [link](https://www.sciencedirect.com/science/article/abs/pii/S1053811918300715) *Describes a multi-subject (hierarchical) model (HTFA) for inferring shared brain network hubs and applies it to a story listening and movie viewing dataset.*
 
-3. Owen LLW, Chang TH, Manning JR (2020). High-level cognition during story listening is reflected in high-order dynamic correlations in neural activity patterns.  *bioRxiv.* [link](https://www.biorxiv.org/content/10.1101/763821v2) *Describes a model for inferring network dynamics from timeseries data and applies it to HTFA fits to a story listening dataset.*
+3. Owen LLW, Chang TH, Manning JR (2020). High-level cognition during story listening is reflected in high-order dynamic correlations in neural activity patterns.  *bioRxiv.* [link](https://www.biorxiv.org/content/10.1101/763821v1.full.pdf) *Describes a model for inferring network dynamics from timeseries data and applies it to HTFA fits to a story listening dataset.*
 
