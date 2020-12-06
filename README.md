@@ -13,7 +13,7 @@ paper are noted in parentheses):
 7. [Inverted Encoding Model](notebooks/iem/iem.ipynb) (IEM; Section 2.7)
 8. [Simulating Realistic fMRI Data](notebooks/fmrisim/fmrisim_multivariate_example.ipynb) (fmrisim; Section 2.8)
 9. [Matrix-Normal Models](notebooks/matnormal/Matrix-normal%20model%20prototyping.ipynb) (Section 2.9.2)
-10. [Real-Time fMRI Analysis](notebook/real-time/rtcloud_notebook.ipynb) (Section 3)
+10. [Real-Time fMRI Analysis](notebooks/real-time/rtcloud_notebook.ipynb) (Section 3)
 
 # Installation
 
@@ -30,7 +30,7 @@ The notebooks include instructions for downloading and using data. All the data 
 ### Examples whose installation instructions are different from the rest.
 1. The [TFA notebook](notebooks/htfa/htfa.ipynb) comes with it's own Docker container, that includes all data and software required to run the notebook. You can follow the installation instructions in the notebook to run it.
 
-2. The [Real-Time fMRI Analysis](notebook/real-time/rtcloud_notebook.ipynb) requires installing a web server, the instructions for which  may be found [here](https://github.com/brainiak/brainiak-aperture/blob/master/notebooks/real-time/README_INSTRUCTIONS.md).
+2. The [Real-Time fMRI Analysis](notebooks/real-time/rtcloud_notebook.ipynb) requires installing a web server, the instructions for which  may be found [here](https://github.com/brainiak/brainiak-aperture/blob/master/notebooks/real-time/README_INSTRUCTIONS.md).
 
 
 # License
