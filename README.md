@@ -22,7 +22,9 @@ Step 1. You need to install BrainIAK and related software to run these example n
 Step 2. Once you complete installation in Step 1, you are ready to download the example notebooks in this repository, and the associated data needed to run them. 
 
 ## Download Example Notebooks
-To download these example notebooks, execute this command on your terminal: `git clone https://github.com/brainiak/brainiak-aperture.git`
+To download these example notebooks, execute this command on your terminal:
+
+`git clone https://github.com/brainiak/brainiak-aperture.git`
 
 ## Data
 The notebooks include instructions for downloading and using data. All the data used is publicly available.
