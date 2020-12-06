@@ -1,5 +1,5 @@
 # Overview
-This repository hosts the example notebooks that are included as a companion to the paper [Kumar et al. (2020) *BrainIAK: Brain Imaging and Analysis Kit*](https://osf.io/preprints/...).  Instructions for running each analysis (including links to the relevant datasets and setup instructions) are included as part of each notebook.
+This repository hosts the example notebooks that are included as a companion to the paper [Kumar et al. (2020) *BrainIAK: Brain Imaging and Analysis Kit*](https://osf.io/preprints/...). Instructions for running each analysis (including links to the relevant datasets and setup instructions) are included as part of each notebook.
 
 # Contents
 The following notebooks are included in the repository (section numbers from the
@@ -19,10 +19,10 @@ paper are noted in parentheses):
 
 Step 1. You need to install BrainIAK and related software to run these example notebooks. To install the software and configure an environment to run Jupyter notebooks, we have provided a variety of installation options as part of the BrainIAK tutorials: https://brainiak.org/tutorials.
 
-Step 2. Once you complete installation in Step 1, you are ready to download the example notebooks, in this repository, and the associated data needed to run them. 
+Step 2. Once you complete installation in Step 1, you are ready to download the example notebooks in this repository, and the associated data needed to run them. 
 
-## Example Notebooks
-Clone this repository: `git clone https://github.com/brainiak/brainiak-aperture.git`
+## Download Example Notebooks
+To download these example notebooks, execute this command on your terminal: `git clone https://github.com/brainiak/brainiak-aperture.git`
 
 ## Data
 The notebooks include instructions for downloading and using data. All the data used is publicly available.
@@ -30,7 +30,7 @@ The notebooks include instructions for downloading and using data. All the data 
 ### Examples whose installation instructions are different from the rest.
 1. The [TFA notebook](notebooks/htfa/htfa.ipynb) comes with it's own Docker container, that includes all data and software required to run the notebook. You can follow the installation instructions in the notebook to run it.
 
-2. The [Real-Time fMRI Analysis](notebook/real-time/rtcloud_notebook.ipynb) requires installing a web server, the instructions for which  may be found [here](https://github.com/brainiak/brainiak-aperture/blob/master/notebooks/real-time/README_INSTRUCTIONS.md)
+2. The [Real-Time fMRI Analysis](notebook/real-time/rtcloud_notebook.ipynb) requires installing a web server, the instructions for which  may be found [here](https://github.com/brainiak/brainiak-aperture/blob/master/notebooks/real-time/README_INSTRUCTIONS.md).
 
 
 # License
