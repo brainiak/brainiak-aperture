@@ -1,5 +1,5 @@
 # Overview
-This repository hosts the example notebooks that are included as a companion to the paper [Kumar et al. (2020) *BrainIAK: Brain Imaging and Analysis Kit*](fill in link to preprint).  Instructions for running each analysis (including links to the relevant datasets and setup instructions) are included as part of each notebook.
+This repository hosts the example notebooks that are included as a companion to the paper [Kumar et al. (2020) *BrainIAK: Brain Imaging and Analysis Kit*](https://osf.io/preprints/...).  Instructions for running each analysis (including links to the relevant datasets and setup instructions) are included as part of each notebook.
 
 # Contents
 The following notebooks are included in the repository (section numbers from the
