@@ -29,7 +29,7 @@ To download these example notebooks, execute this command on your terminal:
 ## Data
 The notebooks include instructions for downloading and using data. All the data used is publicly available.
 
-### The following example notebooks require a different installation sequence
+### The following example notebooks require a different installation sequence:
 
 1. The [TFA notebook](notebooks/htfa/htfa.ipynb) comes with it's own Docker container, that includes all data and software required to run the notebook. You can follow the installation instructions in the notebook to run it.
 
