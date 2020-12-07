@@ -19,7 +19,7 @@ paper are noted in parentheses):
 
 Step 1. You need to install BrainIAK and related software to run these example notebooks. To install the software and configure an environment to run Jupyter notebooks, we have provided a variety of installation options as part of the BrainIAK tutorials: https://brainiak.org/tutorials.
 
-Step 2. Once you complete installation in Step 1, you are ready to download the example notebooks in this repository, and the associated data needed to run them. 
+Step 2. Once you complete installation in Step 1, you are ready to use the example notebooks in this repository, and the associated data needed to run them. 
 
 ## Download Example Notebooks
 To download these example notebooks, execute this command on your terminal:
