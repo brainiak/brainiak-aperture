@@ -19,7 +19,7 @@ paper are noted in parentheses):
 
 Step 1. You need to install BrainIAK and related software to run these example notebooks. To install the software and configure an environment to run Jupyter notebooks, we have provided a variety of installation options as part of the BrainIAK tutorials: https://brainiak.org/tutorials.
 
-Step 2. Once you complete installation in Step 1, you are ready to use the example notebooks in this repository, and the associated data needed to run them. 
+Step 2. Once you complete installation in Step 1, you are ready to use the example notebooks in this repository (after you complete the steps below) and the associated data needed to run them. 
 
 ## Download Example Notebooks
 To download these example notebooks, execute this command on your terminal:
@@ -29,8 +29,7 @@ To download these example notebooks, execute this command on your terminal:
 ## Data
 The notebooks include instructions for downloading and using data. All the data used is publicly available.
 
-### The following example notebooks require a different installation sequence:
-
+### The following example notebooks require a different installation sequence.
 1. The [TFA notebook](notebooks/htfa/htfa.ipynb) comes with it's own Docker container, that includes all data and software required to run the notebook. You can follow the installation instructions in the notebook to run it.
 
 2. The [Real-Time fMRI Analysis notebook](notebooks/real-time/rtcloud_notebook.ipynb) requires installing a web server, the instructions for which  may be found [here](https://github.com/brainiak/brainiak-aperture/blob/master/notebooks/real-time/README_INSTRUCTIONS.md).
