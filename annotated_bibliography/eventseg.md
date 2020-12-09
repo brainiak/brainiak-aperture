@@ -1,9 +1,0 @@
-1. Baldassano, C., Chen, J., Zadbood, A., Pillow, J. W., Hasson, U., & Norman, K. A. (2017). Discovering event structure in continuous narrative perception and memory. *Neuron*, 95(3), 709–721.e5. [`link`](https://doi.org/10.1016/j.neuron.2017.06.041) *Describes and validates the event segmentation method, and applies it to perception and recall data from multiple experiments.*
-
-2. Baldassano, C., Hasson, U., & Norman, K. A. (2018). Representation of real-world event schemas during narrative perception. *Journal of Neuroscience*, 38(45), 9689–9699. [`link`](https://doi.org/10.1523/JNEUROSCI.0251-18.2018) *Uses the event segmentation model to find common event structure among narratives with a shared schematic script.*
-
-3. Ben-Yakov, A., & Henson, R. N. (2018). The hippocampal film editor: sensitivity and specificity to event boundaries in continuous experience. *Journal of Neuroscience*, 38(47), 10057–10068. [`link`](https://doi.org/10.1523/JNEUROSCI.0524-18.2018) *Further studies the relationship between the event boundaries produced by the event segmentation model, human-annotated boundaries, and hippocampal responses.*
-
-4. Silva, M., Baldassano, C., & Fuentemilla, L. (2019). Rapid memory reactivation at movie event boundaries promotes episodic encoding. *Journal of Neuroscience*, 39(43), 8538–8548. [`link`](https://doi.org/10.1523/JNEUROSCI.0360-19.2019) *Applies the event segmentation model to EEG signals collected while subjects were watching a movie.*
-
-5. Antony, J. W., Hartshorne, T. H., Pomeroy, K., Gureckis, T. M., Hasson, U., McDougle, S. D., & Norman, K. A. (2020). Behavioral, physiological, and neural signatures of surprise during naturalistic sports viewing. *Neuron*. [`link`](https://doi.org/10.1016/j.neuron.2020.10.029) *Uses the event segmentation model to relate the number and timing of event boundaries in neural signals  to the degree of surprise elicited in basketball games.*
