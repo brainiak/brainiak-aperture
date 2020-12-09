@@ -30,7 +30,7 @@ To download these example notebooks, execute this command on your terminal:
 The notebooks include instructions for downloading and using data. All the data used is publicly available.
 
 ### The following example notebooks require a different installation sequence.
-1. The [TFA notebook](notebooks/htfa/htfa.ipynb) comes with it's own Docker container, that includes all data and software required to run the notebook. You can follow the installation instructions in the notebook to run it.
+1. The [TFA notebook](notebooks/htfa/htfa.ipynb) comes with its own Docker container, that includes all data and software required to run the notebook. You can follow the installation instructions in the notebook to run it.
 
 2. The [Real-Time fMRI Analysis notebook](notebooks/real-time/rtcloud_notebook.ipynb) requires installing a web server, the instructions for which  may be found [here](https://github.com/brainiak/brainiak-aperture/blob/master/notebooks/real-time/README_INSTRUCTIONS.md).
 
