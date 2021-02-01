@@ -1,6 +1,6 @@
 """-----------------------------------------------------------------------------
 
-sample.py (Last Updated: 11/10/2020)
+sample.py (Last Updated: 01/26/2021)
 
 The purpose of this script is to run a sample project for the BrainIAK Aperture 
 paper. This sample project script will be wrapped by the projectInterface and 
@@ -10,8 +10,8 @@ The purpose of this *particular* script is to demonstrated how you can use the
 various scripts, functions, etc. we have developed for your use! The functions
 we will reference live in 'rt-cloud/rtCommon/'.
 
-Finally, this script is called from 'projectMain.py', which is called from
-'run-projectInterface.sh'.
+Finally, this script is called from the projectServer which is started in the
+jupyter notebook.
 
 -----------------------------------------------------------------------------"""
 
@@ -48,29 +48,26 @@ currPath = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(path_to_rtcloud)
 # import project modules from rt-cloud
 from rtCommon.utils import loadConfigFile
-import rtCommon.clientInterface as clientInterface
-from rtCommon.imageHandling import readRetryDicomFromFileInterface, getDicomFileName, convertDicomImgToNifti, convertDicomFileToNifti, readNifti, convertDicomFileToNifti
+from rtCommon.clientInterface import ClientInterface
+from rtCommon.imageHandling import readRetryDicomFromDataInterface, getDicomFileName, convertDicomImgToNifti, convertDicomFileToNifti, readNifti, convertDicomFileToNifti
 
-def doRuns(cfg, fileInterface, subjInterface):
+def doRuns(cfg, dataInterface, subjInterface, webInterface):
     """
-    This function is called by 'main()' below. Here, we use the 'fileInterface'
+    This function is called by 'main()' below. Here, we use the 'dataInterface'
     to read in dicoms (presumably from the scanner, but here it's from a folder
     with previously collected dicom files), doing some sort of analysis in the
     cloud, and then sending the info to the web browser.
 
     INPUT:
         [1] cfg (configuration file with important variables)
-        [2] fileInterface (this will allow a script from the cloud to access files
+        [2] dataInterface (this will allow a script from the cloud to access files
                from the stimulus computer, which receives dicom files directly
                from the Siemens console computer)
-        [3] projectComm (communication pipe to talk with projectInterface)
+        [3] subjInterface - this allows sending feedback (e.g. classification results)
+                to a subjectService running on the presentation computer to provide
+                feedback to the subject (and optionally get their response).
     OUTPUT:
         None.
-
-    This is the main function that is called when you run 'sample.py'.
-    Here, you will set up an important argument parser (mostly provided by
-    the toml configuration file), initiate the class fileInterface, and then
-    call the function 'doRuns' to actually start doing the experiment.
     """
 
     # variables we'll use throughout
@@ -81,41 +78,35 @@ def doRuns(cfg, fileInterface, subjInterface):
     cfg.dicomDir = cfg.imgDir
     print("Location of the subject's dicoms: %s\n" %cfg.dicomDir)
 
-    # initialize a watch for the entire dicom folder (it doesn't look for a
-    #   specific dicom) using the function 'initWatch' in 'fileClient.py'
+    # Initialize a watch for the entire dicom folder using the function 'initWatch'
+    # in dataInterface. (Later we will use watchFile() to look for a specific dicom)
     #   INPUT:
     #       [1] cfg.dicomDir (where the subject's dicom files live)
     #       [2] cfg.dicomNamePattern (the naming pattern of dicom files)
     #       [3] cfg.minExpectedDicomSize (a check on size to make sure we don't
     #               accidentally grab a dicom before it's fully acquired)
-    fileInterface.initWatch(cfg.dicomDir, cfg.dicomNamePattern,
+    dataInterface.initWatch(cfg.dicomDir, cfg.dicomNamePattern,
         cfg.minExpectedDicomSize)
 
-    # we will use the function 'sendResultToWeb' in 'projectUtils.py' whenever we
-    #   want to send values to the web browser so that they can be plotted in the
-    #   --Data Plots-- tab
-    #   INPUT:
-    #       [1] projectComm (the communication pipe)
-    #       [2] runNum (not to be confused with the scan number)
-    #       [3] this_TR (timepoint of interest)
-    #       [4] value (value you want to send over to the web browser)
-    #       ** the inputs MUST be python integers; it won't work if it's a numpy int
-    #
-    # here, we are clearing an already existing plot
-    print("\n\nClear any pre-existing plot using 'sendResultToWeb'")
+    #We will use the function plotDataPoint in webInterface whenever we
+    #  want to send values to the web browser so that they can be plotted in the
+    #  --Data Plots-- tab.
+    #However at the start of a run we will want to clear the plot, and we can use
+    #clearRunPlot(runId), or clearAllPlots() also in the webInterface object.
+    print("\n\nClear any pre-existing plot for this run using 'clearRunPlot(runNum)'")
+    webInterface.clearRunPlot(runNum)
     print(''
           '###################################################################################')
-    subjInterface.sendClassificationResult(runNum, None, None)
 
     # declare the total number of TRs
     num_trainingData = cfg.numTrainingTRs
     num_total_TRs = cfg.numSynthetic
 
     for this_TR in np.arange(num_total_TRs):
-        # declare variables that are needed to use 'readRetryDicomFromFileInterface'
+        # declare variables that are needed to use 'readRetryDicomFromDataInterface'
         timeout_file = 5 # small number because of demo, can increase for real-time
 
-        # use 'getDicomFileName' from 'readDicom.py' to obtain the filename structure
+        # use 'getDicomFileName' from 'imageHandling.py' to obtain the filename 
         #   of the dicom data you want to get... which is useful considering how
         #   complicated these filenames can be!
         #   INPUT:
@@ -126,22 +117,21 @@ def doRuns(cfg, fileInterface, subjInterface):
         #       [1] fullFileName (the filename of the dicom that should be grabbed)
         fileName = getDicomFileName(cfg, scanNum, this_TR)
 
-        # use 'readRetryDicomFromFileInterface' in 'readDicom.py' to wait for dicom
-        #   files to come in (by using 'watchFile' in 'fileClient.py') and then
-        #   reading the dicom file once it receives it detected having received it
-        #   INPUT:
-        #       [1] fileInterface (this will allow a script from the cloud to access files
-        #               from the stimulus computer that receives dicoms from the Siemens
-        #               console computer)
-        #       [2] filename (for the dicom file we're watching for and want to load)
-        #       [3] timeout (time spent waiting for a file before timing out)
-        #   OUTPUT:
-        #       [1] dicomData (with class 'pydicom.dataset.FileDataset')
-        dicomData = readRetryDicomFromFileInterface(fileInterface, fileName,
+        # Use 'readRetryDicomFromDataInterface' in 'imageHandling.py' to wait for dicom
+        #    files to be written by the scanner (uses 'watchFile' internally) and then
+        #    reading the dicom file once it is available.
+        #INPUT:
+        #    [1] dataInterface (allows a cloud script to access files from the
+        #        control room computer)
+        #    [2] filename (the dicom file we're watching for and want to load)
+        #    [3] timeout (time spent waiting for a file before timing out)
+        #OUTPUT:
+        #    [1] dicomData (with class 'pydicom.dataset.FileDataset')
+        dicomData = readRetryDicomFromDataInterface(dataInterface, fileName,
             timeout_file)
 
-        # normally, we would use the 'convertDicomFileToNifti' function with dicomData as 
-        #   input but here we have doing things manually to accomodate the synthetic data
+        # We can use the 'convertDicomFileToNifti' function with dicomData as 
+        #   input to get the data in NifTi format
         base, ext = os.path.splitext(fileName)
         assert ext == '.dcm'
         niftiFilename = base + '.nii'
@@ -200,7 +190,12 @@ def doRuns(cfg, fileInterface, subjInterface):
             if shifted_labels[this_TR] != 0:
                 prediction = clf.predict(scaler.transform(preprocessed_data[this_TR,:].reshape(1,-1)))
                 print(f'Plotting classifier prediction for TR {this_TR}: {prediction}')
-                subjInterface.sendClassificationResult(runNum, int(this_TR), float(prediction))
+                webInterface.plotDataPoint(runNum, int(this_TR), float(prediction))
+
+                # To send feedback for the subject at the presentation computer use
+                #   the subjInterface as shown below. For this demo there is no
+                #   presentation computer so we won't actually it.
+                # subjInterface.setResult(runNum, int(this_TR), float(prediction))
             else:
                 print(f'Skipping classification because it is a rest trial')
 
@@ -228,8 +223,10 @@ def main(argv=None):
     This is the main function that is called when you run 'sample.py'.
 
     Here, you will load the configuration settings specified in the toml configuration
-    file, initiate the class fileInterface, and then call the function 'doRuns' to
-    actually start doing the experiment.
+    file. It will initiate the class clientInterface which automatically connects
+    to the projectServer and allows making requests, such as to get DICOM or NifTi
+    data using the dataInterface contained in clientInterface.
+    It will then call the function 'doRuns' to actually start doing the experiment.
     """
 
     # define the parameters that will be recognized later on to set up fileIterface
@@ -251,23 +248,28 @@ def main(argv=None):
     cfg.codeDir = currPath
 
     # Make an RPC connection to the projectServer
-    # The 'fileInterface' class, which will allow you to read and write
-    #   files and many other things using functions found in 'fileClient.py'
+    # The 'dataInterface' class allows you to read and write files from the
+    #   control room computer to this script running in the cloud.
     # The 'subjInterface' class will allow us to send classification results
-    #   as feedback to the subject in the MRI scanner
-    clientRPC = clientInterface.ClientRPC()
-    fileInterface = clientRPC.fileInterface
+    #   as feedback to the subject at the presentation computer.
+    clientRPC = ClientInterface()
+    dataInterface = clientRPC.dataInterface
     subjInterface = clientRPC.subjInterface
+    webInterface = clientRPC.webInterface
     
     # now that we have the necessary variables, call the function 'doRuns' in order
     #   to actually start reading dicoms and doing your analyses of interest!
     #   INPUT:
     #       [1] cfg (configuration file with important variables)
-    #       [2] fileInterface (this will allow a script from the cloud to access files
+    #       [2] dataInterface (this will allow a script from the cloud to access files
     #               from the stimulus computer that receives dicoms from the Siemens
     #               console computer)
-    #       [3] subjInterface for sending classification results
-    doRuns(cfg, fileInterface, subjInterface)
+    #       [3] subjInterface - this allows sending feedback (e.g. classification results)
+    #            to a subjectService running on the presentation computer to provide
+    #            feedback to the subject (and optionally get their response).
+    #       [4] webInterface - this allows updating information on the experimenter webpage.
+    #            For example to plot data points, or update status messages.
+    doRuns(cfg, dataInterface, subjInterface, webInterface)
 
     return 0
 
