@@ -19,7 +19,7 @@ RUN apt-get update --fix-missing \
         holoviews=1.13.4 \
         mpi4py=3.0.3 \
         nibabel=3.1.1 \
-        nilearn=0.6.2 \
+        nilearn=0.7.1 \
     && conda clean -afy \
     && pip install \
         timecorr==0.1.5 \
