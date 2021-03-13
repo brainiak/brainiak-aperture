@@ -17,7 +17,9 @@ RUN apt-get update --fix-missing \
         bokeh=2.2.2 \
         ffmpeg=4.3.1 \
         holoviews=1.13.4 \
+        mpi=1.0=mpich \
         mpi4py=3.0.3 \
+        mpich=3.3.2 \
         nibabel=3.1.1 \
         nilearn=0.7.1 \
     && conda clean -afy \
