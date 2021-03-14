@@ -16,10 +16,25 @@ RUN apt-get update --fix-missing \
     && conda install -Sy \
         bokeh=2.2.2 \
         ffmpeg=4.3.1 \
+        h5py=2.10.0 \
         holoviews=1.13.4 \
+        ipykernel=5.3.4 \
+        mpi=1.0=mpich \
         mpi4py=3.0.3 \
+        mpich=3.3.2 \
+        nbclient=0.5.0 \
         nibabel=3.1.1 \
-        nilearn=0.6.2 \
+        nilearn=0.7.1 \
+        notebook=6.1.6 \
+        numpy=1.19.2 \
+        pandas=1.1.3 \
+        panel=0.9.7 \
+        param=1.9.3 \
+        pyviz_comms=0.7.6 \
+        scikit-learn=0.21.3 \
+        scipy=1.5.2 \
+        seaborn=0.11.0 \
+        tornado=6.0.4 \
     && conda clean -afy \
     && pip install \
         timecorr==0.1.5 \
