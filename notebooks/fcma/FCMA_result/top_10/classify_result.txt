@@ -6,3 +6,11 @@ fc_no4_result_seq_top10.nii.gz: 0.45
 fc_no5_result_seq_top10.nii.gz: 0.6
 fc_no6_result_seq_top10.nii.gz: 0.4
 fc_no7_result_seq_top10.nii.gz: 0.45
+fc_no0_result_seq_top10.nii.gz: 0.4
+fc_no1_result_seq_top10.nii.gz: 0.7
+fc_no2_result_seq_top10.nii.gz: 0.6
+fc_no3_result_seq_top10.nii.gz: 0.6
+fc_no4_result_seq_top10.nii.gz: 0.45
+fc_no5_result_seq_top10.nii.gz: 0.6
+fc_no6_result_seq_top10.nii.gz: 0.4
+fc_no7_result_seq_top10.nii.gz: 0.45
