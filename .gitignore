@@ -1,3 +1,12 @@
+# Data needed by notebooks, should be retrieved by running download_data.sh
+notebooks/eventseg/Sherlock_AG_movie.npy
+notebooks/eventseg/Sherlock_AG_recall.npy
+notebooks/fmrisim/Corr_MVPA_Data_dataspace/
+notebooks/fmrisim/Corr_MVPA_archive.tar.gz
+notebooks/isc/brainiak-aperture-isc-data/
+notebooks/srm/brainiak-aperture-srm-data/
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
