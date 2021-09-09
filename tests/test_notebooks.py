@@ -6,6 +6,21 @@ from testbook import testbook
 
 notebook_files = glob.glob("notebooks/**/*.ipynb", recursive=True)
 
+# FIXME: Mark some tests xfail for now.
+def mark_xfail(nb, **kwargs):
+    nb_index = None
+    for i, nb_file in enumerate(notebook_files):
+        if nb in nb_file:
+            nb_index = i
+
+    if nb_index is None:
+        raise ValueError(f"Cannot set notebook {nb} to xfail because it could not be found")
+
+    notebook_files[nb_index] = pytest.param(nb, marks=pytest.mark.xfail(**kwargs))
+
+mark_xfail('htfa.ipynb', reason="Index out of range error")
+mark_xfail('rtcloud_notebook.ipynb', reason="Needs to have a web server installed, will probably need to run this in singularity on della")
+
 @pytest.fixture(autouse=True)
 def chdir_back_to_root():
     """

@@ -9,6 +9,11 @@ notebooks/fmrisim/Corr_MVPA/
 notebooks/iem/AL61_Bilat-V1_attnContrast.mat
 notebooks/iem/RademakerEtAl2019_WM_S05_avgTime.npz
 
+# Files generated when running fmrisim notebook
+notebooks/fmrisim/Condition_A.txt
+notebooks/fmrisim/Condition_B.txt
+notebooks/fmrisim/epoch_file.npy
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
