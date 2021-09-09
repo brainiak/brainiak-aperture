@@ -5,6 +5,9 @@ notebooks/fmrisim/Corr_MVPA_Data_dataspace/
 notebooks/fmrisim/Corr_MVPA_archive.tar.gz
 notebooks/isc/brainiak-aperture-isc-data/
 notebooks/srm/brainiak-aperture-srm-data/
+notebooks/fmrisim/Corr_MVPA/
+notebooks/iem/AL61_Bilat-V1_attnContrast.mat
+notebooks/iem/RademakerEtAl2019_WM_S05_avgTime.npz
 
 
 # Byte-compiled / optimized / DLL files
