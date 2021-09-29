@@ -11,6 +11,7 @@ notebooks/iem/RademakerEtAl2019_WM_S05_avgTime.npz
 notebooks/isc/brainiak-aperture-isc-data.tgz
 notebooks/srm/brainiak-aperture-srm-data.tgz
 notebooks/htfa/data
+notebooks/real-time/sample-config.toml
 
 # Files generated when running fmrisim notebook
 notebooks/fmrisim/Condition_A.txt

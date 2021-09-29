@@ -21,7 +21,7 @@ def mark_xfail(nb, **kwargs):
 
     notebook_files[nb_index] = pytest.param(nb, marks=pytest.mark.xfail(**kwargs))
 
-mark_xfail('rtcloud_notebook.ipynb', reason="Needs to have a web server installed, will probably need to run this in singularity on della")
+#mark_xfail('rtcloud_notebook.ipynb', reason="Needs to have a web server installed, will probably need to run this in singularity on della")
 
 @pytest.fixture(autouse=True)
 def chdir_back_to_root():
