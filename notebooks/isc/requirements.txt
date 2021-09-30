@@ -1,0 +1,7 @@
+matplotlib
+scipy
+seaborn
+brainiak
+nibabel
+numpy
+nilearn
