@@ -1,0 +1,11 @@
+nxviz<=0.6.3
+pandas
+brainiak
+mpi4py
+nilearn
+matplotlib
+seaborn
+networkx
+nibabel
+numpy
+scikit_learn

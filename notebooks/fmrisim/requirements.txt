@@ -1,0 +1,6 @@
+matplotlib
+nibabel
+scipy
+numpy
+brainiak
+scikit_learn

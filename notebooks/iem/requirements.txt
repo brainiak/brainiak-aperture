@@ -1,0 +1,5 @@
+scipy
+brainiak
+numpy
+matplotlib
+scikit_learn

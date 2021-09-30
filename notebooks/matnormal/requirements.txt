@@ -1,0 +1,7 @@
+tensorflow
+numpy
+matplotlib
+brainiak
+seaborn
+scipy
+scikit_learn

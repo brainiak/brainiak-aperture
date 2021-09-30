@@ -1,0 +1,3 @@
+[submodule "notebooks/real-time/rt-cloud"]
+	path = notebooks/real-time/rt-cloud
+	url = https://github.com/brainiak/rt-cloud.git

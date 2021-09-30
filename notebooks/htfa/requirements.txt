@@ -1,0 +1,12 @@
+holoviews
+numpy
+pandas
+brainiak
+nilearn
+timecorr
+matplotlib
+mpi4py
+nibabel
+seaborn
+nltools
+ipython
